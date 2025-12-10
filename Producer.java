@@ -1,25 +1,28 @@
-import java.util.*;
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.Random;
 
-public class Producer extends Thread
-{  public Producer(PipedOutputStream os)
-   {  out = new DataOutputStream(os);
-   }
+public class Producer extends Thread {
+    private DataOutputStream out;
+    private Random rand = new Random();
 
-   public void run()
-   {  while (true)
-      {  try
-         {  double num = rand.nextDouble();
-            out.writeDouble(num);
-            out.flush();
-            sleep(Math.abs(rand.nextInt() % 1000));
-         }
-         catch(Exception e)
-         {  System.out.println("Error: " + e);
-         }
-      }
-   }
+    public Producer(DataOutputStream out) {
+        this.out = out;
+    }
 
-   private DataOutputStream out;
-   private Random rand = new Random();
+    public void run() {
+        System.out.println("[Produtor] Iniciado");
+        while (true) {
+            double value = rand.nextDouble();
+            try {
+                out.writeDouble(value);
+                out.flush();
+                System.out.printf("[Produtor] Enviou: %.6f%n", value);
+                sleep(Math.abs(rand.nextInt() % 1000));
+            } catch (IOException | InterruptedException e) {
+                System.err.println("[Produtor] Erro: " + e.getMessage());
+                break;
+            }
+        }
+    }
 }
