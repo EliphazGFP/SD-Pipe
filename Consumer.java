@@ -1,25 +1,25 @@
-import java.util.*;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.IOException;
 
-public class Consumer extends Thread
-{  public Consumer(PipedInputStream is)
-   {   in = new DataInputStream(is);
-   }
+public class Consumer extends Thread {
+    private DataInputStream in;
+    private double old_avg = 0.0;
 
-   public void run()
-   {  for(;;)
-      {  try
-         {  double avg = in.readDouble();
-            System.out.println("Current average is " + avg);
-            old_avg = avg;
-         }
-         catch(IOException e)
-         {  System.out.println("Error: " + e);
-         }
-      }
-   }
+    public Consumer(DataInputStream in) {
+        this.in = in;
+    }
 
-   private double old_avg = 0;
-   private DataInputStream in;
+    public void run() {
+        System.out.println("[Consumidor] Iniciado - exibindo médias");
+        while (true) {
+            try {
+                double avg = in.readDouble();
+                System.out.printf("[Consumidor] Média atual recebida: %.6f (variação: %.6f)%n", avg, avg - old_avg);
+                old_avg = avg;
+            } catch (IOException e) {
+                System.err.println("[Consumidor] Erro ao ler média: " + e.getMessage());
+                break;
+            }
+        }
+    }
 }
-
