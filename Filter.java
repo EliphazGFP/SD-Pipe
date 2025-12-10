@@ -1,30 +1,35 @@
-import java.util.*;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-public class Filter extends Thread
-{  public Filter(PipedInputStream is, PipedOutputStream os)
-   {  in =  new DataInputStream(is);
-      out = new DataOutputStream(os);
-   }
+public class Filter extends Thread {
+    private DataInputStream in;
+    private DataOutputStream out;
+    private double total = 0.0;
+    private long count = 0;
 
-   public void run()
-   {  for (;;)
-      {  try
-         {  double x = in.readDouble();
-            total += x;
-            count++;
-            if (count != 0) out.writeDouble(total / count);
-         }
-         catch(IOException e)
-         {  System.out.println("Error: " + e);
-         }
-      }
-   }
+    public Filter(DataInputStream in, DataOutputStream out) {
+        this.in = in;
+        this.out = out;
+    }
 
-   private DataInputStream in;
-   private DataOutputStream out;
-   private double total = 0;
-   private int count = 0;
+    public void run() {
+        System.out.println("[Filtro] Iniciado - calculando média móvel");
+        while (true) {
+            try {
+                double value = in.readDouble();
+                total += value;
+                count++;
+                double avg = total / count;
+
+                out.writeDouble(avg);
+                out.flush();
+
+                System.out.printf("[Filtro] Recebeu: %.6f | Média atual: %.6f (total: %d valores)%n", value, avg, count);
+            } catch (IOException e) {
+                System.err.println("[Filtro] Erro na comunicação: " + e.getMessage());
+                break;
+            }
+        }
+    }
 }
-
-
